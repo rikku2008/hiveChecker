@@ -36,8 +36,6 @@ const Links = [
 ]
 
 function IndexPopup() {
-  const [data, setData] = useState("")
-
   return (
     <div className="text-white bg-[#0a0613] w-[400px] py-3 px-2">
       <h1 className="mb-2 text-xl">Cosmetic Shortcut 🐝</h1>
