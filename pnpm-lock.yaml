@@ -11,6 +11,15 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@18.2.48)(react@18.2.0)
+      hive-bedrock-api:
+        specifier: 3.0.0-alpha.32
+        version: 3.0.0-alpha.32
+      hive-bedrock-data:
+        specifier: 2.0.0-alpha.17
+        version: 2.0.0-alpha.17
+      lucide-react:
+        specifier: ^0.552.0
+        version: 0.552.0(react@18.2.0)
       plasmo:
         specifier: 0.90.5
         version: 0.90.5(@swc/core@1.14.0(@swc/helpers@0.5.17))(@swc/helpers@0.5.17)(@types/node@20.11.5)(postcss@8.5.6)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2114,6 +2123,12 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
+  hive-bedrock-api@3.0.0-alpha.32:
+    resolution: {integrity: sha512-2OYIwFLuib3xQs9AJqAijsmbkALa/QnLLF10GOJ8rtsTNmTQws9h8YKIH3zIWs3iM7VbmtHPaj4HeM8u/qy4fw==}
+
+  hive-bedrock-data@2.0.0-alpha.17:
+    resolution: {integrity: sha512-zvVWl2B/CijbjPGp5Py9DX3XmwTRsHPMz0X7EGy5+2i19QITdaUO99uYnCSh14/EQALzpznUr+z9f2SvjAAKfw==}
+
   htmlnano@2.1.5:
     resolution: {integrity: sha512-IXffzXq1beGQN2rsr03aIPK/rVU1jR2uwHymlAIEf97Tl5WdpG50IsQ5nWGvSGQJ+x6U7S6yac9rRiFgAg4/xQ==}
     peerDependencies:
@@ -2484,6 +2499,11 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+
+  lucide-react@0.552.0:
+    resolution: {integrity: sha512-g9WCjmfwqbexSnZE+2cl21PCfXOcqnGeWeMTNAOGEfpPbm/ZF4YIq77Z8qWrxbu660EKuLB4nSLggoKnCb+isw==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -5546,6 +5566,12 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  hive-bedrock-api@3.0.0-alpha.32:
+    dependencies:
+      hive-bedrock-data: 2.0.0-alpha.17
+
+  hive-bedrock-data@2.0.0-alpha.17: {}
+
   htmlnano@2.1.5(postcss@8.5.6)(svgo@2.8.0)(typescript@5.8.2):
     dependencies:
       '@types/relateurl': 0.2.33
@@ -5854,6 +5880,10 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lucide-react@0.552.0(react@18.2.0):
+    dependencies:
+      react: 18.2.0
 
   magic-string@0.30.21:
     dependencies:

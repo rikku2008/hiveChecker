@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
+    "hive-bedrock-api": "3.0.0-alpha.32",
+    "hive-bedrock-data": "2.0.0-alpha.17",
+    "lucide-react": "^0.552.0",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"

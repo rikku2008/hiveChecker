@@ -7,7 +7,7 @@ type Props = ComponentPropsWithRef<"a"> & {
 const LinkButton = ({ children, className, ...props }: Props) => {
   return (
     <a
-      className={`block px-3 py-2 bg-[#160d1b] hover:bg-[#5a2f6d] text-white border border-[#36293d] text-sm font-bold rounded transition-colors duration-200 ${className}`}
+      className={`block px-3 py-2 bg-[#160d1b] hover:bg-[#5a2f6d] text-white border border-[#36293d] text-sm font-bold rounded transition-colors duration-200 ${className || ""}`}
       {...props}
       target="_blank">
       {children}
