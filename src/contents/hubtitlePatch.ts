@@ -1,5 +1,7 @@
 import type { PlasmoCSConfig } from "plasmo"
 
+import { getTitleElements } from "~lib/hubtitle"
+
 export const config: PlasmoCSConfig = {
   matches: ["https://support.playhive.com/hub-titles*"],
   all_frames: true
@@ -47,23 +49,39 @@ const diffs = [
   }
 ]
 
-window.addEventListener("load", () => {
-  document
-    .querySelectorAll("span[style='background-color: #222222']")
-    .forEach((el: HTMLSpanElement) => {
-      const diff = diffs.find((d) => el.innerHTML.includes(d.old))
-      if (diff) {
-        el.innerHTML = el.innerHTML.replace(diff.old, diff.new)
-      }
-    })
+const applyTitleDiffs = (titleElements: HTMLSpanElement[]): void => {
+  titleElements.forEach((element) => {
+    const diff = diffs.find((d) => element.innerHTML.includes(d.old))
+    if (diff) {
+      element.innerHTML = element.innerHTML.replace(diff.old, diff.new)
+    }
+  })
+}
 
+/**
+ * 未掲載のタイトルを追加
+ */
+const addUnlistedTitles = (): void => {
   const hrElements = document.querySelectorAll(".post-content hr")
   const parent = hrElements[hrElements.length - 1]
 
-  for (let title of unListed) {
+  if (!parent) {
+    console.warn("Unable to add unlisted titles: parent element not found.")
+    return
+  }
+
+  for (const title of unListed) {
     const p = document.createElement("p")
     p.innerHTML = `${title.display} - ${title.description}<br>`
     p.style.display = "inline"
     parent.before(p)
   }
-})
+}
+
+const initPatch = (): void => {
+  const titleElements = getTitleElements()
+  applyTitleDiffs(titleElements)
+  addUnlistedTitles()
+}
+
+window.addEventListener("load", initPatch)

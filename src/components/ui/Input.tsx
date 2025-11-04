@@ -1,8 +1,8 @@
-import { useState, type ComponentPropsWithRef } from "react"
+import type { ComponentPropsWithRef } from "react"
 
-type Props = ComponentPropsWithRef<"input">
+type InputProps = ComponentPropsWithRef<"input">
 
-const Input = ({ className, ...props }: Props) => {
+const Input = ({ className, ...props }: InputProps) => {
   return (
     <input
       className={`block px-2 py-1 bg-[#1a101f] text-white border border-[#36293d] rounded ${className || ""}`}

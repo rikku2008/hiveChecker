@@ -1,21 +1,22 @@
 import type { ComponentPropsWithRef } from "react"
 
-type Props = ComponentPropsWithRef<"button"> & {
+type ButtonVariant = "primary" | "secondary"
+
+type ButtonProps = ComponentPropsWithRef<"button"> & {
   children?: React.ReactNode
-  variant: "primary" | "secondary"
+  variant: ButtonVariant
 }
 
-const variantClasses = {
-  primary: "bg-[#964fb5] hover:bg-[#964fb5] text-white",
-  // TODO
-  secondary: ""
+const variantClasses: Record<ButtonVariant, string> = {
+  primary: "bg-[#964fb5] hover:brightness-90",
+  secondary: "bg-[#221827] hover:bg-[#36293d]"
 }
 
-const Button = ({ children, className, variant, ...props }: Props) => {
+const Button = ({ children, className, variant, ...props }: ButtonProps) => {
   return (
     <button
       {...props}
-      className={`${variantClasses[variant]} ${className || ""} p-1 rounded hover:brightness-90 transition-all duration-100`}>
+      className={`${variantClasses[variant]} p-1 rounded transition-all duration-100 text-white ${className || ""}`}>
       {children}
     </button>
   )

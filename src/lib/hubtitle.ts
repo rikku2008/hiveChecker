@@ -1,11 +1,11 @@
 import { fetchStats } from "./api"
 
 export const getTitleElements = () => {
-  const titleElements = document.querySelectorAll(
+  const titleElements = document.querySelectorAll<HTMLSpanElement>(
     'span[style="background-color: #222222"]'
   )
 
-  return Array.from(titleElements) as HTMLSpanElement[]
+  return Array.from(titleElements)
 }
 
 export const fetchTitles = async (gamertag: string) => {

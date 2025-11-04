@@ -26,24 +26,29 @@ export const getStyle = () => {
   return style
 }
 
-const getMode = (url: string) => {
-  const modes = {
-    hubtitle: "hub-titles"
-  }
-  return (
-    Object.entries(modes).find(([, path]) => url.includes(path))?.[0] ||
-    "unknown"
-  )
+type Mode = "hubtitle" | "unknown"
+
+const MODE_PATHS: Record<string, string> = {
+  hubtitle: "hub-titles"
 }
+
+const getMode = (url: string): Mode => {
+  const entry = Object.entries(MODE_PATHS).find(([, path]) =>
+    url.includes(path)
+  )
+  return (entry?.[0] as Mode) || "unknown"
+}
+
+type FilterType = "All" | "Owned" | "Unowned"
 
 const Overlay = () => {
   const mode = getMode(window.location.href)
-  const [message, setMessage] = useState("")
-  const [isOpen, setIsOpen] = useState(true)
-  const toggleOpen = () => {
-    setIsOpen((prev) => !prev)
-  }
 
+  // UI state
+  const [isOpen, setIsOpen] = useState(true)
+  const [message, setMessage] = useState("")
+
+  // Statistics
   const [allAmount, setAllAmount] = useState(0)
   const [ownedAmount, setOwnedAmount] = useState(0)
 
@@ -54,15 +59,21 @@ const Overlay = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [nameCache, setNameCache] = useState<Record<string, string[]>>({})
 
+  // Filter state
+  const [filter, setFilter] = useState<FilterType>("All")
+
+  const toggleOpen = () => setIsOpen((prev) => !prev)
+
   const handleSearch = useCallback(async () => {
-    if (!gamertag.trim()) return
+    const trimmedGamertag = gamertag.trim()
+    if (!trimmedGamertag) return
 
     switch (mode) {
       case "hubtitle": {
         setMessage("Checking titles...")
         resetCheckmarks()
         const titleElements = getTitleElements()
-        const { ownedTitles, error } = await fetchTitles(gamertag.trim())
+        const { ownedTitles, error } = await fetchTitles(trimmedGamertag)
         addCheckmarks(titleElements, ownedTitles)
 
         setMessage(error ? "Unable to fetch data." : "")
@@ -110,10 +121,12 @@ const Overlay = () => {
             prev < autoComplete.length - 1 ? prev + 1 : prev
           )
           break
+
         case "ArrowUp":
           e.preventDefault()
           setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
           break
+
         case "Enter":
           e.preventDefault()
           setFocused(false)
@@ -124,6 +137,7 @@ const Overlay = () => {
             handleSearch()
           }
           break
+
         case "Escape":
           e.preventDefault()
           setFocused(false)
@@ -144,34 +158,40 @@ const Overlay = () => {
     setSelectedIndex(-1)
   }
 
-  // Filter state
-  const [filter, setFilter] = useState<"All" | "Owned" | "Unowned">("All")
-
   const handleFilterChange = useCallback(
-    (v: "All" | "Owned" | "Unowned") => {
-      setFilter(v)
+    (value: FilterType) => {
+      setFilter(value)
       switch (mode) {
-        case "hubtitle": {
+        case "hubtitle":
           const titleElements = getTitleElements()
-          filterCheckmarks(titleElements, v)
-          break
-        }
-        default:
+          filterCheckmarks(titleElements, value)
           break
       }
     },
     [mode]
   )
 
+  const overlayStyles = {
+    width: isOpen ? "350px" : "64px",
+    height: isOpen ? "400px" : "64px"
+  }
+
+  const filterOptions = [
+    { label: `All (${allAmount})`, value: "All" as FilterType },
+    { label: `Owned (${ownedAmount})`, value: "Owned" as FilterType },
+    {
+      label: `Unowned (${allAmount - ownedAmount})`,
+      value: "Unowned" as FilterType
+    }
+  ]
+
+  if (mode === "unknown") return null
+
   return (
     <div
-      style={{
-        display: mode !== "unknown" ? "block" : "none",
-        width: isOpen ? "350px" : "64px",
-        height: isOpen ? "400px" : "64px"
-      }}
+      style={overlayStyles}
       className="fixed bottom-4 left-4 bg-[#0a0613] text-white rounded-xl p-4 transition-all duration-200">
-      {isOpen && (
+      {isOpen ? (
         <div>
           <button onClick={toggleOpen} className="mb-1">
             <h1 className="text-lg">
@@ -200,7 +220,9 @@ const Overlay = () => {
                     fetchSuggestion(e.target.value)
                   }}
                   autoComplete="off"
+                  placeholder="Enter gamertag..."
                 />
+
                 {/* Autocomplete Dropdown */}
                 {focused && autoComplete.length > 0 && (
                   <div className="absolute left-0 right-0 bg-[#160d1b] border border-[#36293d] rounded mt-1 text-sm max-h-80 overflow-y-auto z-10">
@@ -219,44 +241,37 @@ const Overlay = () => {
                   </div>
                 )}
               </div>
+
               <Button variant="primary" onClick={handleSearch}>
                 <Search className="inline mt-[-3px] mr-1" size={16} />
                 Search
               </Button>
             </div>
+
+            {/* Message Display */}
             <div className="text-xs text-red-400 pt-1 h-4">{message}</div>
           </div>
 
-          {/* Filter */}
+          {/* Filter Section */}
           <div className="mt-1">
             <h2 className="font-bold text-sm">Filters</h2>
             <RadioInputGroup
               name="filter"
-              options={[
-                { label: `All (${allAmount})`, value: "All" },
-                { label: `Owned (${ownedAmount})`, value: "Owned" },
-                {
-                  label: `Unowned (${allAmount - ownedAmount})`,
-                  value: "Unowned"
-                }
-              ]}
+              options={filterOptions}
               selected={filter}
               onChange={handleFilterChange}
             />
           </div>
 
+          {/* Footer */}
           <div className="absolute bottom-3 text-sm opacity-50">
             mode: {mode} | version: 2.0.0
           </div>
         </div>
-      )}
-
-      {!isOpen && (
-        <div>
-          <button onClick={toggleOpen}>
-            <ChevronDown size={32} />
-          </button>
-        </div>
+      ) : (
+        <button onClick={toggleOpen}>
+          <ChevronDown size={32} />
+        </button>
       )}
     </div>
   )

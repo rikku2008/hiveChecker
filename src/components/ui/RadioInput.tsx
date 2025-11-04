@@ -7,18 +7,23 @@ type RadioInputProps = Omit<ComponentPropsWithRef<"input">, "type"> & {
 const RadioInput = ({ className, children, ...props }: RadioInputProps) => {
   return (
     <label
-      className={`${className || ""} border border-[#36293d] bg-[#160d1b] has-[input:checked]:bg-[#5a2f6d] px-2 py-2 text-sm rounded transition-colors duration-200`}>
+      className={`border border-[#36293d] bg-[#160d1b] has-[input:checked]:bg-[#5a2f6d] px-2 py-2 text-sm rounded transition-colors duration-200 ${className || ""}`}>
       <input type="radio" {...props} className="hidden" />
       <span className="text-white select-none">{children}</span>
     </label>
   )
 }
 
+type RadioOption = {
+  label: string
+  value: string
+}
+
 type RadioInputGroupProps = Omit<
   RadioInputProps,
   "children" | "value" | "checked" | "onChange"
 > & {
-  options: { label: string; value: string }[]
+  options: RadioOption[]
   selected: string
   onChange: (value: string) => void
 }
