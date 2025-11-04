@@ -29,44 +29,7 @@ export const fetchTitles = async (gamertag: string) => {
   return { ownedTitles, error }
 }
 
-const checkmarkClass = "hub-title-checkmark"
-const checkmarkStyle = `color: inherit; font-size: 16px; margin-left: 8px; font-weight: bold;`
-export const resetCheckmarks = () => {
-  document
-    .querySelectorAll(`.${checkmarkClass}`)
-    .forEach((mark) => mark.remove())
-}
-
-export const addCheckmarks = (
-  els: HTMLSpanElement[],
-  ownedTitles: string[]
-) => {
-  const remainTitles = [...ownedTitles]
-
-  for (const el of els) {
-    const titleName = el.textContent?.toLowerCase().replace(/\s+/g, " ").trim()
-    if (!titleName) continue
-
-    const findIndex = remainTitles.indexOf(titleName)
-    const isOwned = findIndex !== -1
-
-    if (isOwned) {
-      remainTitles.splice(findIndex, 1)
-    }
-
-    const mark = document.createElement("span")
-    mark.className = checkmarkClass
-    mark.style.cssText = checkmarkStyle
-    mark.innerHTML = isOwned ? " ✅" : " ❌"
-    el.appendChild(mark)
-  }
-
-  if (remainTitles.length > 0) {
-    console.log("NotFound titles:", remainTitles)
-  }
-}
-
-export const filterCheckmarks = (
+export const filterHubTitle = (
   els: HTMLSpanElement[],
   type: "All" | "Owned" | "Unowned"
 ) => {

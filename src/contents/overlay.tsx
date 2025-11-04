@@ -7,13 +7,9 @@ import Button from "~components/ui/Button"
 import Input from "~components/ui/Input"
 import { RadioInputGroup } from "~components/ui/RadioInput"
 import { searchPlayer } from "~lib/api"
-import {
-  addCheckmarks,
-  fetchTitles,
-  filterCheckmarks,
-  getTitleElements,
-  resetCheckmarks
-} from "~lib/hubtitle"
+import { addCheckmarks, resetCheckmarks } from "~lib/checkmark"
+import { fetchCostumes, filterCostume, getCostumeElements } from "~lib/costume"
+import { fetchTitles, filterHubTitle, getTitleElements } from "~lib/hubtitle"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://support.playhive.com/*"],
@@ -26,10 +22,11 @@ export const getStyle = () => {
   return style
 }
 
-type Mode = "hubtitle" | "unknown"
+type Mode = "hubtitle" | "costume" | "unknown"
 
 const MODE_PATHS: Record<string, string> = {
-  hubtitle: "hub-titles"
+  hubtitle: "hub-titles",
+  costume: "costumes"
 }
 
 const getMode = (url: string): Mode => {
@@ -79,6 +76,20 @@ const Overlay = () => {
         setMessage(error ? "Unable to fetch data." : "")
         setAllAmount(titleElements.length)
         setOwnedAmount(ownedTitles.length)
+        break
+      }
+      case "costume": {
+        setMessage("Checking costumes...")
+        resetCheckmarks()
+        const costumeElements = getCostumeElements()
+        const { ownedCostumes, error } = await fetchCostumes(trimmedGamertag)
+        addCheckmarks(costumeElements, ownedCostumes, (itemname) => {
+          return itemname.replaceAll(":", "").trim()
+        })
+
+        setMessage(error ? "Unable to fetch data." : "")
+        setAllAmount(costumeElements.length)
+        setOwnedAmount(ownedCostumes.length)
         break
       }
       default:
@@ -164,7 +175,11 @@ const Overlay = () => {
       switch (mode) {
         case "hubtitle":
           const titleElements = getTitleElements()
-          filterCheckmarks(titleElements, value)
+          filterHubTitle(titleElements, value)
+          break
+        case "costume":
+          const costumeElements = getCostumeElements()
+          filterCostume(costumeElements, value)
           break
       }
     },
