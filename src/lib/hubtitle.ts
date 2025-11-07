@@ -8,7 +8,7 @@ export const getTitleElements = () => {
   return Array.from(titleElements)
 }
 
-export const fetchTitles = async (gamertag: string) => {
+export const fetchTitle = async (gamertag: string) => {
   const { data, error } = await fetchStats(gamertag)
   if (error) {
     return { ownedTitles: [], error }

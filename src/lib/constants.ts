@@ -26,6 +26,10 @@ export const links = [
   {
     href: "https://support.playhive.com/mounts/",
     title: "Hub Mounts"
+  },
+  {
+    href: "https://support.playhive.com/win-celebrations/",
+    title: "Win Celebrations"
   }
 ]
 

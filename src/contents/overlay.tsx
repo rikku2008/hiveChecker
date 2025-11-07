@@ -1,15 +1,17 @@
 import cssText from "data-text:~style.css"
 import { ChevronDown, ChevronUp, Search } from "lucide-react"
 import type { PlasmoCSConfig } from "plasmo"
-import { useCallback, useState } from "react"
+import { useCallback, useState, type KeyboardEvent } from "react"
 
+import ImageSizeSlider from "~components/ImageSizeSlider"
 import Button from "~components/ui/Button"
 import Input from "~components/ui/Input"
 import { RadioInputGroup } from "~components/ui/RadioInput"
 import { searchPlayer } from "~lib/api"
+import { fetchAvatar, filterAvatar, getAvatarElements } from "~lib/avatar"
 import { addCheckmarks, resetCheckmarks } from "~lib/checkmark"
-import { fetchCostumes, filterCostume, getCostumeElements } from "~lib/costume"
-import { fetchTitles, filterHubTitle, getTitleElements } from "~lib/hubtitle"
+import { fetchCostume, filterCostume, getCostumeElements } from "~lib/costume"
+import { fetchTitle, filterHubTitle, getTitleElements } from "~lib/hubtitle"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://support.playhive.com/*"],
@@ -22,11 +24,26 @@ export const getStyle = () => {
   return style
 }
 
-type Mode = "hubtitle" | "costume" | "unknown"
+type Mode =
+  | "hubtitle"
+  | "costume"
+  | "avatar"
+  | "backbling"
+  | "hat"
+  | "pet"
+  | "mount"
+  | "wincelebration"
+  | "unknown"
 
 const MODE_PATHS: Record<string, string> = {
   hubtitle: "hub-titles",
-  costume: "costumes"
+  costume: "costumes",
+  avatar: "avatars",
+  backbling: "back-blings",
+  hat: "hats",
+  pet: "pets",
+  mount: "mounts",
+  wincelebration: "win-celebrations"
 }
 
 const getMode = (url: string): Mode => {
@@ -59,7 +76,7 @@ const Overlay = () => {
   // Filter state
   const [filter, setFilter] = useState<FilterType>("All")
 
-  const toggleOpen = () => setIsOpen((prev) => !prev)
+  const toggleOpen = useCallback(() => setIsOpen((prev) => !prev), [])
 
   const handleSearch = useCallback(async () => {
     const trimmedGamertag = gamertag.trim()
@@ -70,7 +87,7 @@ const Overlay = () => {
         setMessage("Checking titles...")
         resetCheckmarks()
         const titleElements = getTitleElements()
-        const { ownedTitles, error } = await fetchTitles(trimmedGamertag)
+        const { ownedTitles, error } = await fetchTitle(trimmedGamertag)
         addCheckmarks(titleElements, ownedTitles)
 
         setMessage(error ? "Unable to fetch data." : "")
@@ -82,7 +99,7 @@ const Overlay = () => {
         setMessage("Checking costumes...")
         resetCheckmarks()
         const costumeElements = getCostumeElements()
-        const { ownedCostumes, error } = await fetchCostumes(trimmedGamertag)
+        const { ownedCostumes, error } = await fetchCostume(trimmedGamertag)
         addCheckmarks(costumeElements, ownedCostumes, (itemname) => {
           return itemname.replaceAll(":", "").trim()
         })
@@ -90,6 +107,17 @@ const Overlay = () => {
         setMessage(error ? "Unable to fetch data." : "")
         setAllAmount(costumeElements.length)
         setOwnedAmount(ownedCostumes.length)
+        break
+      }
+      case "avatar": {
+        setMessage("Checking avatars...")
+        resetCheckmarks()
+        const avatarElements = getAvatarElements()
+        const { ownedAvatars, error } = await fetchAvatar(trimmedGamertag)
+        addCheckmarks(avatarElements, ownedAvatars)
+        setMessage(error ? "Unable to fetch data." : "")
+        setAllAmount(avatarElements.length)
+        setOwnedAmount(ownedAvatars.length)
         break
       }
       default:
@@ -121,53 +149,56 @@ const Overlay = () => {
     [nameCache]
   )
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.nativeEvent.isComposing) return
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.nativeEvent.isComposing) return
 
-    if (focused && autoComplete.length > 0) {
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault()
-          setSelectedIndex((prev) =>
-            prev < autoComplete.length - 1 ? prev + 1 : prev
-          )
-          break
+      if (focused && autoComplete.length > 0) {
+        switch (e.key) {
+          case "ArrowDown":
+            e.preventDefault()
+            setSelectedIndex((prev) =>
+              prev < autoComplete.length - 1 ? prev + 1 : prev
+            )
+            break
 
-        case "ArrowUp":
-          e.preventDefault()
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
-          break
+          case "ArrowUp":
+            e.preventDefault()
+            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
+            break
 
-        case "Enter":
-          e.preventDefault()
-          setFocused(false)
-          setAutoComplete([])
-          if (selectedIndex >= 0) {
-            setGamertag(autoComplete[selectedIndex])
-          } else {
-            handleSearch()
-          }
-          break
+          case "Enter":
+            e.preventDefault()
+            setFocused(false)
+            setAutoComplete([])
+            if (selectedIndex >= 0) {
+              setGamertag(autoComplete[selectedIndex])
+            } else {
+              handleSearch()
+            }
+            break
 
-        case "Escape":
-          e.preventDefault()
-          setFocused(false)
-          setAutoComplete([])
-          setSelectedIndex(-1)
-          break
+          case "Escape":
+            e.preventDefault()
+            setFocused(false)
+            setAutoComplete([])
+            setSelectedIndex(-1)
+            break
+        }
+      } else if (e.key === "Enter") {
+        setAutoComplete([])
+        handleSearch()
       }
-    } else if (e.key === "Enter") {
-      setAutoComplete([])
-      handleSearch()
-    }
-  }
+    },
+    [focused, autoComplete, selectedIndex, handleSearch]
+  )
 
-  const selectSuggestion = (name: string) => {
+  const selectSuggestion = useCallback((name: string) => {
     setGamertag(name)
     setFocused(false)
     setAutoComplete([])
     setSelectedIndex(-1)
-  }
+  }, [])
 
   const handleFilterChange = useCallback(
     (value: FilterType) => {
@@ -180,6 +211,10 @@ const Overlay = () => {
         case "costume":
           const costumeElements = getCostumeElements()
           filterCostume(costumeElements, value)
+          break
+        case "avatar":
+          const avatarElements = getAvatarElements()
+          filterAvatar(avatarElements, value)
           break
       }
     },
@@ -277,6 +312,17 @@ const Overlay = () => {
               onChange={handleFilterChange}
             />
           </div>
+
+          {/* Image Size */}
+          {mode === "avatar" && <ImageSizeSlider />}
+
+          {["backbling", "hat", "pet", "mount", "wincelebration"].includes(
+            mode
+          ) && (
+            <div className="mt-1 text-red-600">
+              <h1>⚠️SEARCH FOR THIS MODE IS WORK IN PROGRESS</h1>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="absolute bottom-3 text-sm opacity-50">

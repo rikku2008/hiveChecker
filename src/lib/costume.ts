@@ -11,7 +11,7 @@ export const getCostumeElements = () => {
   return costumeElements
 }
 
-export const fetchCostumes = async (gamertag: string) => {
+export const fetchCostume = async (gamertag: string) => {
   const { data, error } = await fetchStats(gamertag)
   if (error) {
     return { ownedCostumes: [], error }
