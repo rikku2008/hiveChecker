@@ -6,6 +6,7 @@ import { useCallback, useState, type KeyboardEvent } from "react"
 import ImageSizeSlider from "~components/ImageSizeSlider"
 import Button from "~components/ui/Button"
 import Input from "~components/ui/Input"
+import Progress from "~components/ui/Progress"
 import { RadioInputGroup } from "~components/ui/RadioInput"
 import { searchPlayer } from "~lib/api"
 import { fetchAvatar, filterAvatar, getAvatarElements } from "~lib/avatar"
@@ -65,6 +66,7 @@ const Overlay = () => {
   // Statistics
   const [allAmount, setAllAmount] = useState(0)
   const [ownedAmount, setOwnedAmount] = useState(0)
+  const progress = Math.floor((ownedAmount / (allAmount || 1)) * 10000) / 10000
 
   // Search state
   const [gamertag, setGamertag] = useState("")
@@ -312,6 +314,9 @@ const Overlay = () => {
               onChange={handleFilterChange}
             />
           </div>
+
+          {/* Progress Bar */}
+          <Progress value={progress} className="mt-1" />
 
           {/* Image Size */}
           {mode === "avatar" && <ImageSizeSlider />}

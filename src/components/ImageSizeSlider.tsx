@@ -31,7 +31,7 @@ const ImageSizeSlider = () => {
         min="50"
         max="500"
         value={size}
-        className="w-full"
+        className="w-full accent-[#8747a3]"
         onChange={handleSliderChange}
       />
       <div className="text-xs text-right text-gray-400 mt-1">{size}px</div>
