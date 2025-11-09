@@ -1,6 +1,6 @@
 import type { PlasmoCSConfig } from "plasmo"
 
-import { getHatElements } from "~lib/hat"
+import { getUnlockElements } from "~lib/commonUnlock"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://support.playhive.com/hats*"],
@@ -33,7 +33,7 @@ const applyTitleDiffs = (costumeElements: HTMLElement[]): void => {
 }
 
 const initPatch = (): void => {
-  const costumeElements = getHatElements()
+  const costumeElements = getUnlockElements()
   applyTitleDiffs(costumeElements)
 }
 

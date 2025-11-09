@@ -10,14 +10,9 @@ import Progress from "~components/ui/Progress"
 import { RadioInputGroup } from "~components/ui/RadioInput"
 import { searchPlayer } from "~lib/api"
 import { fetchAvatar, filterAvatar, getAvatarElements } from "~lib/avatar"
-import {
-  fetchBackbling,
-  filterBackbling,
-  getBackblingElements
-} from "~lib/backbling"
 import { addCheckmarks, resetCheckmarks } from "~lib/checkmark"
+import { fetchUnlock, filterUnlock, getUnlockElements } from "~lib/commonUnlock"
 import { fetchCostume, filterCostume, getCostumeElements } from "~lib/costume"
-import { fetchHat, filterHat, getHatElements } from "~lib/hat"
 import { fetchTitle, filterHubTitle, getTitleElements } from "~lib/hubtitle"
 
 export const config: PlasmoCSConfig = {
@@ -63,7 +58,7 @@ const getMode = (url: string): Mode => {
 type FilterType = "All" | "Owned" | "Unowned"
 
 const Overlay = () => {
-  const mode = getMode(window.location.href)
+  const type = getMode(window.location.href)
 
   // UI state
   const [isOpen, setIsOpen] = useState(true)
@@ -90,7 +85,7 @@ const Overlay = () => {
     const trimmedGamertag = gamertag.trim()
     if (!trimmedGamertag) return
 
-    switch (mode) {
+    switch (type) {
       case "hubtitle": {
         setMessage("Checking titles...")
         resetCheckmarks()
@@ -128,32 +123,23 @@ const Overlay = () => {
         setOwnedAmount(ownedAvatars.length)
         break
       }
-      case "backbling": {
-        setMessage("Checking backblings...")
+      case "backbling":
+      case "hat":
+      case "pet":
+      case "mount":
+        setMessage(`Checking ${type}...`)
         resetCheckmarks()
-        const backblingElements = getBackblingElements()
-        const { ownedBackblings, error } = await fetchBackbling(trimmedGamertag)
-        addCheckmarks(backblingElements, ownedBackblings)
+        const elements = getUnlockElements()
+        const { ownedUnlocks, error } = await fetchUnlock(trimmedGamertag, type)
+        addCheckmarks(elements, ownedUnlocks)
         setMessage(error ? "Unable to fetch data." : "")
-        setAllAmount(backblingElements.length)
-        setOwnedAmount(ownedBackblings.length)
+        setAllAmount(elements.length)
+        setOwnedAmount(ownedUnlocks.length)
         break
-      }
-      case "hat": {
-        setMessage("Checking hats...")
-        resetCheckmarks()
-        const hatElements = getHatElements()
-        const { ownedHats, error } = await fetchHat(trimmedGamertag)
-        addCheckmarks(hatElements, ownedHats)
-        setMessage(error ? "Unable to fetch data." : "")
-        setAllAmount(hatElements.length)
-        setOwnedAmount(ownedHats.length)
-        break
-      }
       default:
         break
     }
-  }, [mode, gamertag])
+  }, [type, gamertag])
 
   const fetchSuggestion = useCallback(
     async (name: string) => {
@@ -233,7 +219,7 @@ const Overlay = () => {
   const handleFilterChange = useCallback(
     (value: FilterType) => {
       setFilter(value)
-      switch (mode) {
+      switch (type) {
         case "hubtitle":
           const titleElements = getTitleElements()
           filterHubTitle(titleElements, value)
@@ -246,17 +232,16 @@ const Overlay = () => {
           const avatarElements = getAvatarElements()
           filterAvatar(avatarElements, value)
           break
-        case "backbling":
-          const backblingElements = getBackblingElements()
-          filterBackbling(backblingElements, value)
-          break
         case "hat":
-          const hatElements = getHatElements()
-          filterHat(hatElements, value)
+        case "backbling":
+        case "pet":
+        case "mount":
+          const hatElements = getUnlockElements()
+          filterUnlock(hatElements, value)
           break
       }
     },
-    [mode]
+    [type]
   )
 
   const overlayStyles = {
@@ -273,7 +258,7 @@ const Overlay = () => {
     }
   ]
 
-  if (mode === "unknown") return null
+  if (type === "unknown") return null
 
   return (
     <div
@@ -355,17 +340,20 @@ const Overlay = () => {
           <Progress value={progress} className="mt-1" />
 
           {/* Image Size */}
-          {mode === "avatar" && <ImageSizeSlider />}
+          {type === "avatar" && <ImageSizeSlider />}
 
-          {["pet", "mount", "wincelebration"].includes(mode) && (
+          {["wincelebration"].includes(type) && (
             <div className="mt-1 text-red-600">
-              <h1>⚠️SEARCH FOR THIS MODE IS WORK IN PROGRESS</h1>
+              <h1>
+                ⚠️You cannot search for this type of unlock because the Hive API
+                does not return your own unlocks.
+              </h1>
             </div>
           )}
 
           {/* Footer */}
           <div className="absolute bottom-3 text-sm opacity-50">
-            mode: {mode} | version: 2.0.0
+            type: {type} | version: 2.0.0
           </div>
         </div>
       ) : (
