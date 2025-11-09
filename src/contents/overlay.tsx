@@ -10,8 +10,14 @@ import Progress from "~components/ui/Progress"
 import { RadioInputGroup } from "~components/ui/RadioInput"
 import { searchPlayer } from "~lib/api"
 import { fetchAvatar, filterAvatar, getAvatarElements } from "~lib/avatar"
+import {
+  fetchBackbling,
+  filterBackbling,
+  getBackblingElements
+} from "~lib/backbling"
 import { addCheckmarks, resetCheckmarks } from "~lib/checkmark"
 import { fetchCostume, filterCostume, getCostumeElements } from "~lib/costume"
+import { fetchHat, filterHat, getHatElements } from "~lib/hat"
 import { fetchTitle, filterHubTitle, getTitleElements } from "~lib/hubtitle"
 
 export const config: PlasmoCSConfig = {
@@ -122,6 +128,28 @@ const Overlay = () => {
         setOwnedAmount(ownedAvatars.length)
         break
       }
+      case "backbling": {
+        setMessage("Checking backblings...")
+        resetCheckmarks()
+        const backblingElements = getBackblingElements()
+        const { ownedBackblings, error } = await fetchBackbling(trimmedGamertag)
+        addCheckmarks(backblingElements, ownedBackblings)
+        setMessage(error ? "Unable to fetch data." : "")
+        setAllAmount(backblingElements.length)
+        setOwnedAmount(ownedBackblings.length)
+        break
+      }
+      case "hat": {
+        setMessage("Checking hats...")
+        resetCheckmarks()
+        const hatElements = getHatElements()
+        const { ownedHats, error } = await fetchHat(trimmedGamertag)
+        addCheckmarks(hatElements, ownedHats)
+        setMessage(error ? "Unable to fetch data." : "")
+        setAllAmount(hatElements.length)
+        setOwnedAmount(ownedHats.length)
+        break
+      }
       default:
         break
     }
@@ -217,6 +245,14 @@ const Overlay = () => {
         case "avatar":
           const avatarElements = getAvatarElements()
           filterAvatar(avatarElements, value)
+          break
+        case "backbling":
+          const backblingElements = getBackblingElements()
+          filterBackbling(backblingElements, value)
+          break
+        case "hat":
+          const hatElements = getHatElements()
+          filterHat(hatElements, value)
           break
       }
     },
@@ -321,9 +357,7 @@ const Overlay = () => {
           {/* Image Size */}
           {mode === "avatar" && <ImageSizeSlider />}
 
-          {["backbling", "hat", "pet", "mount", "wincelebration"].includes(
-            mode
-          ) && (
+          {["pet", "mount", "wincelebration"].includes(mode) && (
             <div className="mt-1 text-red-600">
               <h1>⚠️SEARCH FOR THIS MODE IS WORK IN PROGRESS</h1>
             </div>
